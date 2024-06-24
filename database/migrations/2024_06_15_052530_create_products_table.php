@@ -18,6 +18,7 @@ return new class extends Migration
             $table->bigInteger("user_id");
             $table->bigInteger("category_id");
             $table->string("name");
+            $table->string("deskripsi");
             $table->integer("hargaproduk");
             $table->integer("jumlah");
             $table->timestamps();

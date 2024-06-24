@@ -12,27 +12,45 @@ use Illuminate\Validation\ValidationException;
 class AuthenticationController extends Controller
 {
     public function login(Request $request) 
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-       $user = User::where('email', $request->email)->first();
-       if (! $user || ! Hash::check($request->password, $user->password)) {
-        throw ValidationException::withMessages([
-            'email' => ['The provided credentials are incorrect.'],
-        ]);
-     }
-     return $user->createToken('user login')->plainTextToken;
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    // Coba mencari pengguna berdasarkan email
+    $user = User::where('email', $request->email)->first();
+
+    // Jika pengguna tidak ditemukan, kembalikan respon kesalahan
+    if (!$user) {
+        return response()->json([
+            'message' => 'User not found',
+        ], 404);
     }
 
-    public function logout(Request $request)
-     {
-        $request->user()->currentAccessToken()->delete();
 
-    
-         return response()->json(['message' => 'Logged out successfully']);
+    // Jika kata sandi cocok, buat token dan kembalikan
+    return response()->json([
+        'token' => $user->createToken('user login')->plainTextToken,
+    ], 200);
+}
+
+
+   public function logout(Request $request)
+   {
+    // Ambil user dari request
+    $user = $request->user();
+
+    // Pastikan user terautentikasi
+    if ($user) {
+        // Hapus access token saat ini
+        $user->currentAccessToken()->delete();
+        return response()->json(['message' => 'Logged out successfully']);
+    } else {
+        // Jika user tidak terautentikasi
+        return response()->json(['error' => 'No user authenticated'], 401);
     }
+  }
 
     public function me(Request $request)
     {
@@ -60,8 +78,8 @@ class AuthenticationController extends Controller
             }
     }
 
-    
+}  
 
     
     
-}
+

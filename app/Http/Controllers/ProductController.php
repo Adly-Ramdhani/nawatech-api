@@ -133,7 +133,7 @@ class ProductController extends Controller
     public function destroy(Product $product, $id)
     {
         try {
-            $checkProses = Product::where('id', $id)->delete();
+            $checkProses = Product::where('id', $id)->softDelete();
 
             if ($checkProses) {
                 return ApiFormatter::sendResponse(200, 'success', 'Data category berhasil dihapus');
